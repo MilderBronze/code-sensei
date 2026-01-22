@@ -3,11 +3,12 @@ Gemini AI Integration for Enhanced Code Analysis
 Uses Google Gemini API for sophisticated code understanding
 """
 
-import os
-import google.generativeai as genai
-from dotenv import load_dotenv
-from typing import Dict, List, Optional
 import json
+import os
+from typing import Dict, List, Optional
+
+from dotenv import load_dotenv
+import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
@@ -16,29 +17,29 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    MODEL = genai.GenerativeModel('gemini-2.5-flash')
 else:
-    model = None
+    MODEL = None
 
 
 def is_gemini_available() -> bool:
     """Check if Gemini API is available and configured"""
-    return GEMINI_API_KEY is not None and model is not None
+    return GEMINI_API_KEY is not None and MODEL is not None
 
 
 def analyze_complexity_with_gemini(code: str) -> Optional[Dict]:
     """
     Use Gemini to analyze code complexity with deep understanding
-    
+
     Args:
         code: The code to analyze
-        
+
     Returns:
         Dictionary with complexity analysis or None if unavailable
     """
     if not is_gemini_available():
         return None
-    
+
     try:
         prompt = f"""Analyze the time and space complexity of this code. Provide a detailed, accurate analysis.
 
@@ -78,12 +79,8 @@ Be precise and thorough. Consider:
 4. Hidden complexities in library functions
 5. Best, average, and worst case scenarios"""
 
-        response = model.generate_content(prompt)
-        
-        # Extract JSON from response
+        response = MODEL.generate_content(prompt)
         response_text = response.text.strip()
-        
-        # Try to find JSON in the response
         if '```json' in response_text:
             json_start = response_text.find('```json') + 7
             json_end = response_text.find('```', json_start)
@@ -92,28 +89,27 @@ Be precise and thorough. Consider:
             json_start = response_text.find('```') + 3
             json_end = response_text.find('```', json_start)
             response_text = response_text[json_start:json_end].strip()
-        
-        result = json.loads(response_text)
-        return result
-        
+        return json.loads(response_text)
+    except ValueError as ve:
+        print(f"JSON parsing error: {ve}")
     except Exception as e:
         print(f"Gemini API error: {e}")
-        return None
+    return None
 
 
 def detect_patterns_with_gemini(code: str) -> Optional[Dict]:
     """
     Use Gemini to detect DSA patterns with high accuracy
-    
+
     Args:
         code: The code to analyze
-        
+
     Returns:
         Dictionary with pattern detection results or None if unavailable
     """
     if not is_gemini_available():
         return None
-    
+
     try:
         prompt = f"""Analyze this code and identify all Data Structures & Algorithms patterns being used.
 
@@ -169,12 +165,8 @@ Common patterns to look for:
 - K-way Merge
 - Topological Sort"""
 
-        response = model.generate_content(prompt)
-        
-        # Extract JSON from response
+        response = MODEL.generate_content(prompt)
         response_text = response.text.strip()
-        
-        # Try to find JSON in the response
         if '```json' in response_text:
             json_start = response_text.find('```json') + 7
             json_end = response_text.find('```', json_start)
@@ -183,28 +175,27 @@ Common patterns to look for:
             json_start = response_text.find('```') + 3
             json_end = response_text.find('```', json_start)
             response_text = response_text[json_start:json_end].strip()
-        
-        result = json.loads(response_text)
-        return result
-        
+        return json.loads(response_text)
+    except ValueError as ve:
+        print(f"JSON parsing error: {ve}")
     except Exception as e:
         print(f"Gemini API error: {e}")
-        return None
+    return None
 
 
 def get_optimization_suggestions(code: str) -> Optional[List[str]]:
     """
     Get optimization suggestions from Gemini
-    
+
     Args:
         code: The code to analyze
-        
+
     Returns:
         List of optimization suggestions or None if unavailable
     """
     if not is_gemini_available():
         return None
-    
+
     try:
         prompt = f"""Analyze this code and provide specific optimization suggestions.
 
@@ -227,12 +218,8 @@ Format as a JSON array:
     "Suggestion 3 with example"
 ]"""
 
-        response = model.generate_content(prompt)
-        
-        # Extract JSON from response
+        response = MODEL.generate_content(prompt)
         response_text = response.text.strip()
-        
-        # Try to find JSON in the response
         if '```json' in response_text:
             json_start = response_text.find('```json') + 7
             json_end = response_text.find('```', json_start)
@@ -241,28 +228,27 @@ Format as a JSON array:
             json_start = response_text.find('```') + 3
             json_end = response_text.find('```', json_start)
             response_text = response_text[json_start:json_end].strip()
-        
-        result = json.loads(response_text)
-        return result
-        
+        return json.loads(response_text)
+    except ValueError as ve:
+        print(f"JSON parsing error: {ve}")
     except Exception as e:
         print(f"Gemini API error: {e}")
-        return None
+    return None
 
 
 def explain_algorithm(code: str) -> Optional[str]:
     """
     Get a natural language explanation of the algorithm
-    
+
     Args:
         code: The code to explain
-        
+
     Returns:
         Explanation string or None if unavailable
     """
     if not is_gemini_available():
         return None
-    
+
     try:
         prompt = f"""Provide a clear, educational explanation of what this algorithm does and how it works.
 
@@ -278,9 +264,8 @@ Explain in 2-3 paragraphs:
 
 Keep it clear and educational, as if teaching a student."""
 
-        response = model.generate_content(prompt)
+        response = MODEL.generate_content(prompt)
         return response.text.strip()
-        
     except Exception as e:
         print(f"Gemini API error: {e}")
         return None
